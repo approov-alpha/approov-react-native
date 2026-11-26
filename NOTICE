@@ -1,0 +1,6 @@
+Approov Package for React Native
+Copyright (c) 2016-present, Approov Ltd.
+
+This package is licensed under the MIT License. See LICENSE.
+
+This package uses the Approov Package for Android (io.approov:service.android) and the Approov Package for iOS (approov-service-ios), both MIT, and through them the Approov SDK (io.approov:approov-android-sdk and approov-ios-sdk). The Approov SDK is not part of this package and is not covered by the MIT License. It is proprietary software of Approov Ltd, and you can use it only under the Approov terms (https://approov.io/terms) or your written agreement with Approov.

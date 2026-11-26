@@ -1,0 +1,79 @@
+// Android part of @approov/approov-react-native: the TurboModule ApproovReactNative (Java package io.approov.react), a thin
+// bridge from JavaScript to the universal Approov layer io.approov:service.android. It is built as a library
+// project of the app, which provides React Native, its OkHttp and the React Native Gradle plugin (New Architecture
+// only, React Native 0.82 and later). The React Native Gradle plugin generates NativeApproovReactNativeSpec from
+// the codegenConfig of ../package.json.
+import groovy.json.JsonSlurper
+
+apply plugin: "com.android.library"
+apply plugin: "com.facebook.react"
+
+// the npm package, whose version is reported in the Approov user property and is the default layer version
+def packageJson = new JsonSlurper().parse(file("../package.json"))
+def packageVersion = packageJson.version
+
+// a value the app sets on its root project (ext or gradle.properties), or the given default
+def rootValue(String name, Object fallback) {
+    def value = rootProject.findProperty(name)
+    return (value != null) ? value : fallback
+}
+
+// @approov/approov-service-react-native (3.5.x) also protects React Native's networking and brings its
+// own Approov SDK, so the build fails when its autolinked project is present. Autolinking names a project
+// after the npm package (":approov_approov-service-react-native"), and the directory is checked too for an
+// app that links it by hand under another name.
+def legacyPackage = "@approov/approov-service-react-native"
+def legacyProject = rootProject.allprojects.find { other ->
+    (other.path == ":approov_approov-service-react-native") ||
+            other.projectDir.absolutePath.replace("\\", "/").endsWith("/node_modules/${legacyPackage}/android")
+}
+if (legacyProject != null) {
+    throw new GradleException("@approov/approov-react-native cannot be built with ${legacyPackage}, which is in this " +
+            "build as Gradle project ${legacyProject.path}: both protect React Native's networking and both " +
+            "bring an Approov SDK. Remove ${legacyPackage} from the app's dependencies (npm uninstall " +
+            "${legacyPackage}), then regenerate the native project (npx expo prebuild --clean) or run the " +
+            "build again.")
+}
+
+// the version of the universal layer: approovServiceAndroidVersion on the app's root project, or else the
+// version of this package
+def approovServiceAndroidVersion = rootValue("approovServiceAndroidVersion", packageVersion)
+
+android {
+    namespace "io.approov.react"
+    compileSdk rootValue("compileSdkVersion", 36) as Integer
+
+    defaultConfig {
+        minSdk rootValue("minSdkVersion", 24) as Integer
+        // the npm package version, for the user property approov-react-native/<version>
+        buildConfigField "String", "APPROOV_REACT_NATIVE_VERSION", "\"${packageVersion}\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // React Native, in the version of the app
+    implementation "com.facebook.react:react-android"
+
+    // the OkHttp group is excluded on this path, as on every path by which this package brings the layer
+    // into an app, so that the app keeps React Native's OkHttp 4. One path without the exclusion would bring
+    // OkHttp 5 and its BOM back for the whole app.
+    implementation("io.approov:service.android:${approovServiceAndroidVersion}") {
+        exclude group: "com.squareup.okhttp3"
+    }
+
+    // the Approov SDK comes with the layer, which declares it as api, so this module names no SDK version
+}

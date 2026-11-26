@@ -1,0 +1,100 @@
+{
+  "name": "@approov/approov-react-native",
+  "version": "3.7.0",
+  "private": true,
+  "description": "Approov package for React Native, built on the universal Approov service layers for Android and iOS, with an Expo config plugin",
+  "license": "MIT",
+  "author": "Approov Ltd",
+  "homepage": "https://approov.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/approov-alpha/approov-react-native.git"
+  },
+  "keywords": [
+    "approov",
+    "react-native",
+    "expo",
+    "config-plugin",
+    "app attestation",
+    "certificate pinning"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "files": [
+    "src",
+    "lib",
+    "android/build.gradle",
+    "android/src/main",
+    "ios",
+    "*.podspec",
+    "jest",
+    "app.plugin.js",
+    "plugin/build",
+    "plugin/README.md",
+    "README.md",
+    "ADVANCED.md",
+    "REFERENCE.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build:js": "tsc -p .",
+    "build:plugin": "tsc -p plugin",
+    "build": "npm run build:js && npm run build:plugin",
+    "test:js": "jest -c jest.config.cjs",
+    "test:plugin": "npm run build:plugin && jest -c plugin/jest.config.cjs",
+    "test:docs": "node scripts/check-minimum-versions.js",
+    "test": "npm run test:js && npm run test:plugin && npm run test:docs",
+    "prepack": "npm run build:plugin && npm run build:js && npm run test:docs"
+  },
+  "peerDependencies": {
+    "expo": ">=55.0.0",
+    "react": ">=19.0.0",
+    "react-native": ">=0.82.0"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.17",
+    "babel-jest": "^30.2.0",
+    "expo": "^55.0.31",
+    "jest": "^30.2.0",
+    "react": "^19.1.1",
+    "react-native": "^0.82.1",
+    "react-test-renderer": "^19.1.1",
+    "typescript": ">=5.5.4"
+  },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.1.1"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
+    }
+  },
+  "codegenConfig": {
+    "name": "NativeApproovReactNativeSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "io.approov.react"
+    },
+    "ios": {
+      "modulesProvider": {
+        "ApproovReactNative": "ApproovReactNative"
+      }
+    }
+  }
+}
